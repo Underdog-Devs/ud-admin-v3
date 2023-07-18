@@ -1,0 +1,225 @@
+@import 'app/styles/globals.scss';
+
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 1200px;
+	margin: $space-xl auto;
+
+	@include for-phone-only {
+		text-align: justify;
+	}
+
+	.return {
+		font-family: $primaryHeaderFont;
+		font-size: $f5;
+		text-decoration: none;
+		align-self: flex-start;
+		color: $udBlack;
+	}
+
+	header {
+		position: relative;
+		width: 60%;
+		margin-bottom: $space-lg;
+
+		@include for-phone-only {
+			width: 80%;
+		}
+
+		h3 {
+			font-family: $primaryHeaderFont;
+			font-weight: bold;
+			font-size: $f3;
+			margin: $space-xs 0;
+			color: $textBlack;
+			font-family: $primaryHeaderFont;
+
+			@include for-phone-only {
+				font-size: $f5;
+				text-align: center;
+			}
+
+			@include for-tablet-up {
+				font-size: $f4;
+			}
+
+			@include for-desktop-up {
+				font-size: $f3;
+			}
+		}
+
+		.socialContainer {
+			position: absolute;
+			left: -$space-xxl;
+			text-align: center;
+			margin: 0;
+
+			@include for-phone-only {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 15px;
+				left: 0;
+				position: relative;
+			}
+
+			@include for-tablet-up {
+				position: absolute;
+				left: -$space-xxl;
+				text-align: center;
+				margin: 0;
+			}
+
+			li {
+				margin: $space-md 0;
+				list-style-type: none;
+			}
+		}
+	}
+
+	.blogText {
+		max-width: 85%;
+		p {
+			font-size: 1.25rem;
+			line-height: 1.6rem;
+			color: $subTextBlack;
+			font-size: 1rem;
+			font-family: $primaryTextFont;
+			
+		}
+
+		ul,
+		ol {
+			margin-left: $space-md;
+		}
+
+		ul {
+			margin-top: $space-sm;
+			list-style: disc;
+		}
+
+		ol {
+			list-style: decimal;
+		}
+	}
+
+	.blog {
+		display: inline-block;
+
+		.thumbNailContainer {
+			float: right;
+			margin: $space-md;
+
+			@include for-phone-only {
+				float: none;
+			}
+
+			@include for-tablet-up {
+				float: none;
+			}
+		}
+
+		.blogThumbnail {
+			width: 272px;
+			background-size: cover;
+
+			@include for-phone-only {
+				width: 100%;
+			}
+
+			@include for-tablet-up {
+				width: 100%;
+			}
+		}
+
+		p {
+			line-height: 1.5rem;
+			font-family: $primaryTextFont;
+
+			@include for-phone-only {
+				display: inline-block;
+			}
+
+			@include for-tablet-up {
+				display: inline-block;
+			}
+		}
+	}
+
+	.blogMain {
+		width: 80%;
+
+		.blogImage {
+			// padding: $space-md;
+			object-fit: cover;
+
+			@include for-phone-only {
+				width: 100%;
+			}
+
+			@include for-tablet-up {
+				display: flex;
+				width: 100%;
+			}
+		}
+
+		.blogTitle {
+			font-family: $secondaryHeaderFont;
+			font-size: $f3;
+			text-align: center;
+			padding: $space-sm 0;
+		}
+
+		.blogSubTitle {
+			font-family: $secondaryHeaderFont;
+			font-size: $f4;
+			padding: $space-sm 0;
+		}
+
+		p {
+			line-height: 1.5rem;
+			font-family: $primaryTextFont;
+		}
+	}
+
+	.blogInfo {
+		border-top: 1px solid $textBlack;
+		border-bottom: 1px solid $textBlack;
+		margin-top: $space-md;
+		padding: $space-sm 0 $space-sm $space-lg;
+
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+
+		@include for-phone-only {
+			display: block;
+		}
+
+		@include for-tablet-up {
+			display: block;
+		}
+
+		p {
+			font-size: $space-unit;
+			color: $textBlack;
+			font-family: $primaryTextFont;
+			@include for-phone-only {
+				font-size: $space-sm;
+			}
+		}
+
+		.blogAuthor {
+			&Name {
+				font-weight: bold;
+			}
+
+			&Title {
+				font-style: italic;
+			}
+		}
+	}
+}

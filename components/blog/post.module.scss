@@ -1,0 +1,29 @@
+@import '../../app/styles/globals.scss';
+
+.container {
+	display: grid;
+	grid-template-columns: 100px 1fr;
+	gap: $space-xs;
+	background-color: rgb(255, 255, 255);
+	border: 1px solid rgb(228, 228, 228);
+	padding: $space-sm $space-md;
+	border-radius: $space-sm;
+	font-family: $primaryTextFont;
+	img {
+		max-width: 80px;
+	}
+	>div {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		h3 {
+			font-size: $space-md;
+			cursor: pointer;
+		}
+		p {
+			line-height: $space-md;
+		}
+	}
+	
+}
+
