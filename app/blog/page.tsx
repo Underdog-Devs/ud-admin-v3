@@ -8,7 +8,6 @@ import Nav from "@/components/dashboard/nav";
 import { BsSlashLg } from "react-icons/bs";
 
 async function fetchPosts(id: string): Promise<Post[]> {
-  console.log("Inside fetchPosts: ", id);
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_HOSTNAME}/api/posts?id=${id}`
   );

@@ -6,12 +6,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const supabase = createRouteHandlerClient({ cookies });
   const from = Number(searchParams.get("page"));
-  //   const {
-  //     data: { user },
-  //   } = await supabase.auth.getUser();
-
-  console.log("Search Params: ", searchParams);
-  console.log("User ID is: ", searchParams.get("id"));
 
   const userId = searchParams.get("id");
 

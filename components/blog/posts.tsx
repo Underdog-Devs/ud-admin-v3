@@ -11,7 +11,6 @@ interface PostsProps {
 }
 
 export const BlogPosts = ({ initialPosts, userId }: PostsProps) => {
-  console.log("initialPosts: ", initialPosts);
   const [screenWidth, setScreenWidth] = useState<number>(0);
   const fetching = React.useRef(false);
   const [pages, setPages] = React.useState(initialPosts);
