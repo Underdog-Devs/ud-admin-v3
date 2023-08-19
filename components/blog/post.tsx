@@ -40,16 +40,23 @@ function Post({ post }: { post: any }) {
 
   return (
     <div className={styles.container}>
-      <div>
+      <div className={styles["image-container"]}>
         {imageUrl ? (
-          <img
+          <Image
+            fill
             className={styles.img}
             src={imageUrl}
-            alt="Featured"
+            alt="Post featured image"
             loading="lazy"
+            style={{ objectFit: "contain" }}
           />
         ) : (
-          <Image src="/images/fallback.png" width="64" height="80" alt={""} />
+          <Image
+            src="/images/fallback.png"
+            fill
+            style={{ objectFit: "contain" }}
+            alt={"Post image missing"}
+          />
         )}
       </div>
       <div>
