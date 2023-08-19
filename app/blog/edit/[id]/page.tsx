@@ -13,6 +13,7 @@ import Nav from "@/components/dashboard/nav";
 import { Input } from "@/components/input";
 import { redirect } from "next/navigation";
 import { useParams } from "next/navigation";
+import { PostImage } from "@/components/blog/PostImage";
 
 function EditPost() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ function EditPost() {
   const [fileSizeWarning, setFileSizeWarning] = useState("");
   const [postTitle, setPostTitle] = useState("Loading...");
   const [didFetch, setDidFetch] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const supabase = createClientComponentClient();
 
@@ -46,11 +48,18 @@ function EditPost() {
     tipTapEditor?.commands.setContent(firstParagraph);
   }, [didFetch]);
 
+  // author, title, image, entry, first_paragraph, created_at
   async function getPost() {
-    const { data } = await supabase.from("posts").select("*").eq("id", id);
+    let { data, error, status } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("id", id)
+      .single();
     if (data) {
-      setPostTitle(data[0].title);
-      setFirstParagraph(data[0].entry.content[0].content[0].text);
+      console.log("Proper Data: ", data);
+      setPostTitle(data.title);
+      setFirstParagraph(data.entry.content[0].content[0].text);
+      setImageUrl(data.image);
       setDidFetch(true);
     }
   }
@@ -112,7 +121,7 @@ function EditPost() {
       author: user?.id,
       title: postTitle,
       first_paragraph: firstParagraph,
-      image,
+      image: imageUrl,
     });
     if (!error) {
       redirect("/blog");
@@ -144,14 +153,14 @@ function EditPost() {
                 value={postTitle || ""}
               />
             </Input>
-            <Input labelFor="featured-image" labelText="Featured Image">
-              <input
-                onChange={handleFiles}
-                id="featured-image"
-                type="file"
-                accept="image/*"
-              />
-            </Input>
+            <PostImage
+              uid={id}
+              url={imageUrl}
+              size={150}
+              onUpload={(url: string) => {
+                setImageUrl(url);
+              }}
+            />
             {fileSizeWarning && (
               <p style={{ color: "red" }}>{fileSizeWarning}</p>
             )}
