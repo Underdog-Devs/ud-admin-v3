@@ -1,14 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Head from "next/head";
-import { EditorContent, useEditor } from "@tiptap/react";
 import Image from "next/image";
-import StarterKit from "@tiptap/starter-kit";
-import Highlight from "@tiptap/extension-highlight";
-import Typography from "@tiptap/extension-typography";
-import { Image as TipTapImage } from "@tiptap/extension-image";
-import TextAlign from "@tiptap/extension-text-align";
 import { BsTwitter, BsFacebook } from "react-icons/bs";
 import styles from "./post.module.scss";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -25,23 +18,9 @@ const PostPage = () => {
 		`;
   };
 
-  const editor = useEditor({
-    editable: false,
-    content: "",
-    extensions: [
-      StarterKit,
-      Highlight,
-      Typography,
-      TipTapImage,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-    ],
-  });
-
   useEffect(() => {
     getPosts();
-  }, [supabase, editor]);
+  }, [supabase]);
 
   // useEffect(() => {
   //   if (post?.image) getImage(post.image);
@@ -59,10 +38,9 @@ const PostPage = () => {
         throw error;
       }
 
-      if (data && editor) {
+      if (data) {
         setPosts(data);
         getImage(data.image);
-        editor!.commands.setContent(data.entry);
       }
     } catch (error) {
       console.log("Error fetching post in /blog/[title]");
@@ -99,15 +77,6 @@ const PostPage = () => {
     const postLink = `/blog/${postTitle
       .replace(/\s+/g, "-")
       .replace(/[^a-zA-Z0-9\s-]/g, "")}/${postId}`;
-
-    if (!editor) {
-      return null;
-    }
-
-    //	return (
-    //		<div><EditorContent className={styles.blogText} editor={editor} /></div>
-    //	)
-    //}
 
     return (
       <div
