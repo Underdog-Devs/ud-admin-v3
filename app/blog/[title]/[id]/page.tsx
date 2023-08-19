@@ -18,6 +18,7 @@ const PostPage = () => {
   const { id } = useParams();
   const supabase = createClientComponentClient();
   const [post, setPosts] = useState<any>();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const twitterText = (postTitle: string, postId: string) => {
     return `${postTitle} \n
 		http://www.underdogdevs.org/blog/${postId}
@@ -37,20 +38,53 @@ const PostPage = () => {
       }),
     ],
   });
+
   useEffect(() => {
-    const getPosts = async () => {
+    getPosts();
+  }, [supabase, editor]);
+
+  // useEffect(() => {
+  //   if (post?.image) getImage(post.image);
+  // }, [supabase, post]);
+
+  async function getPosts() {
+    try {
       const { data, error } = await supabase
         .from("posts")
         .select(`*, author ( name )`)
-        .eq("id", id);
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       if (data && editor) {
         setPosts(data);
-        editor!.commands.setContent(data[0].entry);
+        getImage(data.image);
+        editor!.commands.setContent(data.entry);
       }
-    };
+    } catch (error) {
+      console.log("Error fetching post in /blog/[title]");
+    }
+  }
 
-    getPosts();
-  }, [supabase, setPosts, editor]);
+  async function getImage(path: string) {
+    try {
+      const { data, error } = await supabase.storage
+        .from("images")
+        .download(path);
+
+      if (error) {
+        throw error;
+      }
+
+      const url = URL.createObjectURL(data);
+      setImageUrl(url);
+    } catch (error) {
+      console.log("Problem fetching image in /blog/[title]");
+    }
+  }
 
   if (post) {
     const {
@@ -60,7 +94,7 @@ const PostPage = () => {
       title: postTitle,
       created_at,
       image,
-    } = post[0];
+    } = post;
     const displayDate = created_at.substring(0, 10);
     const postLink = `/blog/${postTitle
       .replace(/\s+/g, "-")
@@ -76,46 +110,23 @@ const PostPage = () => {
     //}
 
     return (
-      <div className={styles.container}>
-        <Head>
-          <title>{postTitle}</title>
-          <meta property="og:title" content={postTitle} />
-          <meta
-            property="og:image"
-            content={
-              image || "https://www.underdogdevs.org/images/fallback.png"
-            }
-          />
-          <meta
-            property="og:description"
-            content="UnderdogDevs is a group of software engineers supporting formerly incarcerated and disadvantaged aspiring developers"
-          />
-          <meta
-            property="og:url"
-            content={`http://www.underdogdevs.org${postLink}`}
-          />
-          <meta property="og:type" content="article" />
-          <meta property="og:site_name" content="UnderdogDevs" />
-          <meta property="article:published_time" content={created_at} />
-          <meta property="article:author" content={name} />
-          <meta property="article:section" content="Technology" />
-          <meta property="article:tag" content="Technology" />
-          <meta property="article:tag" content="Software Engineering" />
-          <meta property="article:tag" content="Software Development" />
-          <meta property="article:tag" content="Software" />
-          <meta property="article:tag" content="Programming" />
-          <meta property="article:tag" content="Programming Languages" />
-          <meta property="article:tag" content="Web Development" />
-          <meta property="article:tag" content="Web Developer" />
-        </Head>
-        <header className={styles.header}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: 1200,
+          margin: "auto",
+          gap: "1rem",
+        }}
+      >
+        <header style={{ display: "flex", gap: "2rem" }}>
           <Link passHref href="/blog">
             Back
           </Link>
 
           <h3>{postTitle}</h3>
 
-          <ul className={styles.socialContainer}>
+          <ul style={{ display: "flex", gap: "1rem" }}>
             <p>Share</p>
             <li>
               <a
@@ -136,24 +147,18 @@ const PostPage = () => {
             </li>
           </ul>
         </header>
-        {image ? (
-          <img
-            className={styles.img}
-            src={image}
-            style={{ maxHeight: "600px", maxWidth: "600px" }}
-            alt="Featured"
-            loading="lazy"
-          />
-        ) : (
-          <Image
-            src="/images/fallback.png"
-            height="230"
-            width="320"
-            priority={true}
-            alt={""}
-          />
-        )}
-        <EditorContent className={styles.blogText} editor={editor} />
+
+        <Image
+          width={600}
+          height={600}
+          className={styles.img}
+          src={imageUrl ?? "/images/fallback.png"}
+          alt={imageUrl ? "Post image" : "Post image not found"}
+          style={{ objectFit: "contain" }}
+          loading="lazy"
+        />
+
+        <p>{post.first_paragraph}</p>
 
         <div className={styles.blogMain}>
           <section className={styles.blogInfo}>
