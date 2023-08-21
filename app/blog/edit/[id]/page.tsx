@@ -1,17 +1,20 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  User,
+  createClientComponentClient,
+} from "@supabase/auth-helpers-nextjs";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import { Image as tiptapImage } from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-import { useEditor } from "@tiptap/react";
+import { JSONContent, useEditor } from "@tiptap/react";
 import TipTapEdit from "@/components/blog/tiptapEditor/tiptap-edit";
 import styles from "./edit.module.scss";
 import Nav from "@/components/dashboard/nav";
 import { Input } from "@/components/input";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { PostImage } from "@/components/blog/PostImage";
 
@@ -24,8 +27,12 @@ function EditPost() {
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeWarning, setFileSizeWarning] = useState<string | null>("");
   const [updating, setUpdating] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [entry, setEntry] = useState<JSONContent | null>(null);
+  const [postUpdateError, setPostUpdateError] = useState<Error | null>(null);
 
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
   const tipTapEditor = useEditor({
     extensions: [
@@ -38,19 +45,21 @@ function EditPost() {
       }),
     ],
     onUpdate() {
-      setFirstParagraph(tipTapEditor?.getText() || "");
+      setEntry(tipTapEditor?.getJSON() ?? {});
+      setFirstParagraph(tipTapEditor?.getText() ?? "");
     },
   });
 
   useEffect(() => {
     getPost();
-  }, []);
+    getUser();
+  }, [supabase]);
 
   useEffect(() => {
     tipTapEditor?.commands.setContent(firstParagraph);
+    setEntry(tipTapEditor?.getJSON() ?? {});
   }, [didFetch]);
 
-  // author, title, image, entry, first_paragraph, created_at
   async function getPost() {
     try {
       let { data, error: fetchError } = await supabase
@@ -68,11 +77,30 @@ function EditPost() {
       setImageUrl(data.image || null);
       setDidFetch(true);
     } catch (error) {
-      console.log(error);
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "Error fetching post in /blog/edit/[id]\n",
+          "Error: ",
+          error
+        );
+      }
     }
   }
 
-  // TODO: use filesize to restrict options
+  async function getUser() {
+    try {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        throw error;
+      }
+
+      setUser(data.user);
+    } catch (error) {
+      console.log("There was an error fetching User.\n", "Error: ", error);
+    }
+  }
+
   function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
     if (!event.target.files || event.target.files.length === 0) {
       setFileSizeWarning(null);
@@ -92,53 +120,77 @@ function EditPost() {
     }
   }
 
-  // async function handleImageUpload() {
-  //   // TODO: update to only uploading on submit
+  async function updateBlogPost() {
+    try {
+      let imagePath: string | null = null;
+      // check if user is null, throws error
+      if (!user?.id) throw new Error("Unable to find user id or id is invalid");
+      // check for editor, throws error
+      if (!tipTapEditor) throw new Error("Editor failed to load");
+      // if file exists, user used the picker to set it
+      // attempt to upload image and get url, throws error
+      if (file) {
+        imagePath = imageUrl
+          ? await replaceCurrentImage(imageUrl, file)
+          : await uploadNewImage(file);
+      }
 
-  //   const datePrefix = Date.now();
-  //   const fileName = `media/${datePrefix}-${file!.name}`;
-  //   // Get signed key for file name in current directory.
-  //   const response = await fetch(`/api/presignedurl?fileName=${fileName}`);
-
-  //   const data = await response.json();
-  //   const url = data.signedUrlObject.url;
-  //   fetch(url, {
-  //     method: "PUT",
-  //     body: file,
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         return `Error uploading ${fileName}.`;
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       return `Error uploading ${fileName}.`;
-  //     });
-  //   return `${process.env.NEXT_PUBLIC_S3_URL}${fileName}`;
-  // }
-
-  async function postBlog() {
-    let image = "";
-    if (file) {
-      image = await handleImageUpload();
+      // attempt to update post
+      const { error: updatePostError } = await supabase.from("posts").upsert({
+        id,
+        entry: entry,
+        author: user?.id,
+        title: postTitle,
+        first_paragraph: firstParagraph,
+        image: imageUrl,
+      });
+      if (updatePostError) {
+        throw updatePostError;
+      }
+      router.push("/dashboard");
+    } catch (error: any) {
+      setPostUpdateError(error);
+      console.log("There was an error updating post.\n", "Error: ", error);
+      setUpdating(false);
     }
+  }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  async function uploadNewImage(file: File) {
+    try {
+      if (file) {
+        const fileExt = file.name.split(".").pop();
+        const imagePath = `${user?.id}-${Math.random()}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from("images")
+          .upload(imagePath, file);
 
-    const { data, error } = await supabase.from("posts").upsert({
-      id,
-      entry: tipTapEditor?.getJSON(),
-      author: user?.id,
-      title: postTitle,
-      first_paragraph: firstParagraph,
-      image: imageUrl,
-    });
-    if (!error) {
-      redirect("/blog");
+        if (error) {
+          throw error;
+        }
+        return data.path;
+      }
+    } catch (error) {
+      console.log("Error placing image in storage: ", error);
+      return null;
     }
-    setUpdating(false);
+    return null;
+  }
+
+  async function replaceCurrentImage(filePath: string, file: File) {
+    try {
+      const { error } = await supabase.storage
+        .from("images")
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      return filePath;
+    } catch (error) {
+      console.log("Error replacing image in storage: ", error);
+      return null;
+    }
   }
 
   function eraseBlog() {
@@ -154,7 +206,7 @@ function EditPost() {
       <div>
         <Nav />
       </div>
-      <form className={styles.main} action={postBlog}>
+      <form className={styles.main} action={updateBlogPost}>
         <div className={styles.topContainer}>
           <div>
             <Input labelFor="title" labelText="Title">
@@ -195,6 +247,9 @@ function EditPost() {
             Clear
           </button>
         </div>
+        {postUpdateError && (
+          <p style={{ color: "red" }}>{postUpdateError.message}</p>
+        )}
       </form>
     </div>
   );

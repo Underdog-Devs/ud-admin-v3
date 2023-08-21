@@ -43,7 +43,10 @@ const PostPage = () => {
         getImage(data.image);
       }
     } catch (error) {
-      console.log("Error fetching post in /blog/[title]");
+      // if in dev mode, log error
+      if (process.env.NODE_ENV === "development") {
+        console.log("Error fetching post in /blog/[title]\n", "Error: ", error);
+      }
     }
   }
 
