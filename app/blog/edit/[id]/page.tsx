@@ -6,7 +6,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import { Image as tiptapImage } from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
 import TipTapEdit from "@/components/blog/tiptapEditor/tiptap-edit";
 import styles from "./edit.module.scss";
 import Nav from "@/components/dashboard/nav";
@@ -18,10 +18,12 @@ import { PostImage } from "@/components/blog/PostImage";
 function EditPost() {
   const { id } = useParams();
   const [firstParagraph, setFirstParagraph] = useState<string>("Loading...");
-  const [fileSizeWarning, setFileSizeWarning] = useState("");
   const [postTitle, setPostTitle] = useState("Loading...");
   const [didFetch, setDidFetch] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileSizeWarning, setFileSizeWarning] = useState<string | null>("");
+  const [updating, setUpdating] = useState<boolean>(false);
 
   const supabase = createClientComponentClient();
 
@@ -50,60 +52,70 @@ function EditPost() {
 
   // author, title, image, entry, first_paragraph, created_at
   async function getPost() {
-    let { data, error, status } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("id", id)
-      .single();
-    if (data) {
-      console.log("Proper Data: ", data);
+    try {
+      let { data, error: fetchError } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
       setPostTitle(data.title);
       setFirstParagraph(data.entry.content[0].content[0].text);
-      setImageUrl(data.image);
+      setImageUrl(data.image || null);
       setDidFetch(true);
+    } catch (error) {
+      console.log(error);
     }
   }
 
-  let file: File | null = null;
-
-  function handleFiles(
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) {
-    const files = (e.target as HTMLInputElement).files;
-    file = files![0];
+  // TODO: use filesize to restrict options
+  function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files || event.target.files.length === 0) {
+      setFileSizeWarning(null);
+      setFile(null);
+      return;
+    }
+    const file = event.target.files[0];
     // Check file size and set warning if it's too large
-    if (file.size > 1572864) {
+    if (file && file.size > 1572864) {
       setFileSizeWarning(
         "File size exceeds 1.5MB. Please choose a smaller file."
       );
-      file = null;
+      setFile(null);
     } else {
-      setFileSizeWarning("");
+      setFileSizeWarning(null);
+      setFile(file);
     }
   }
 
-  async function handleImageUpload() {
-    const datePrefix = Date.now();
-    const fileName = `media/${datePrefix}-${file!.name}`;
-    // Get signed key for file name in current directory.
-    const response = await fetch(`/api/presignedurl?fileName=${fileName}`);
+  // async function handleImageUpload() {
+  //   // TODO: update to only uploading on submit
 
-    const data = await response.json();
-    const url = data.signedUrlObject.url;
-    fetch(url, {
-      method: "PUT",
-      body: file,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return `Error uploading ${fileName}.`;
-        }
-      })
-      .catch((err) => {
-        return `Error uploading ${fileName}.`;
-      });
-    return `${process.env.NEXT_PUBLIC_S3_URL}${fileName}`;
-  }
+  //   const datePrefix = Date.now();
+  //   const fileName = `media/${datePrefix}-${file!.name}`;
+  //   // Get signed key for file name in current directory.
+  //   const response = await fetch(`/api/presignedurl?fileName=${fileName}`);
+
+  //   const data = await response.json();
+  //   const url = data.signedUrlObject.url;
+  //   fetch(url, {
+  //     method: "PUT",
+  //     body: file,
+  //   })
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         return `Error uploading ${fileName}.`;
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       return `Error uploading ${fileName}.`;
+  //     });
+  //   return `${process.env.NEXT_PUBLIC_S3_URL}${fileName}`;
+  // }
 
   async function postBlog() {
     let image = "";
@@ -126,6 +138,7 @@ function EditPost() {
     if (!error) {
       redirect("/blog");
     }
+    setUpdating(false);
   }
 
   function eraseBlog() {
@@ -153,14 +166,15 @@ function EditPost() {
                 value={postTitle || ""}
               />
             </Input>
-            <PostImage
-              uid={id}
-              url={imageUrl}
-              size={150}
-              onUpload={(url: string) => {
-                setImageUrl(url);
-              }}
-            />
+            <PostImage url={imageUrl} size={150} />
+            <Input labelFor="featured-image" labelText="Featured Image">
+              <input
+                onChange={handleFiles}
+                id="featured-image"
+                type="file"
+                accept="image/*"
+              />
+            </Input>
             {fileSizeWarning && (
               <p style={{ color: "red" }}>{fileSizeWarning}</p>
             )}
@@ -169,11 +183,15 @@ function EditPost() {
 
         <TipTapEdit editor={tipTapEditor} />
 
-        <EditorContent editor={tipTapEditor} content={"Test"} />
-
         <div className={styles.buttons}>
-          <button type="submit">Publish</button>
-          <button className={styles.clearButton} onClick={eraseBlog}>
+          <button type="submit" disabled={updating}>
+            Publish
+          </button>
+          <button
+            className={styles.clearButton}
+            onClick={eraseBlog}
+            disabled={updating}
+          >
             Clear
           </button>
         </div>
