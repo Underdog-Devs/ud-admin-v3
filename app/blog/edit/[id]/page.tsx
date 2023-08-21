@@ -147,7 +147,7 @@ function EditPost() {
       if (updatePostError) {
         throw updatePostError;
       }
-      router.push("/dashboard");
+      router.push("/blog");
     } catch (error: any) {
       setPostUpdateError(error);
       console.log("There was an error updating post.\n", "Error: ", error);
