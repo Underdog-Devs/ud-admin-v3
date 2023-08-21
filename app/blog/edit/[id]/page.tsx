@@ -30,6 +30,7 @@ function EditPost() {
   const [user, setUser] = useState<User | null>(null);
   const [entry, setEntry] = useState<JSONContent | null>(null);
   const [postUpdateError, setPostUpdateError] = useState<Error | null>(null);
+  const [updated, setUpdated] = useState<boolean>(false);
 
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -47,6 +48,7 @@ function EditPost() {
     onUpdate() {
       setEntry(tipTapEditor?.getJSON() ?? {});
       setFirstParagraph(tipTapEditor?.getText() ?? "");
+      setUpdated(false);
     },
   });
 
@@ -142,12 +144,12 @@ function EditPost() {
         author: user?.id,
         title: postTitle,
         first_paragraph: firstParagraph,
-        image: imageUrl,
+        image: imagePath,
       });
       if (updatePostError) {
         throw updatePostError;
       }
-      router.push("/blog");
+      setUpdated(true);
     } catch (error: any) {
       setPostUpdateError(error);
       console.log("There was an error updating post.\n", "Error: ", error);
@@ -249,6 +251,9 @@ function EditPost() {
         </div>
         {postUpdateError && (
           <p style={{ color: "red" }}>{postUpdateError.message}</p>
+        )}
+        {updated && (
+          <p style={{ color: "green" }}>Post updated successfully!</p>
         )}
       </form>
     </div>
