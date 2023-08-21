@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   User,
   createClientComponentClient,
@@ -17,6 +17,7 @@ import { Input } from "@/components/input";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { PostImage } from "@/components/blog/PostImage";
+import { PostBlogSchema } from "@/lib/schema";
 
 function EditPost() {
   const { id } = useParams();
@@ -90,7 +91,7 @@ function EditPost() {
       }
     }
   }
-      
+
   async function getUser() {
     try {
       const { data, error } = await supabase.auth.getUser();
@@ -126,6 +127,20 @@ function EditPost() {
 
   async function updateBlogPost() {
     try {
+      const validationResult = PostBlogSchema.safeParse({
+        title: postTitle,
+        entry: tipTapEditor?.getJSON()?.content?.[0]?.content?.[0]?.text,
+      });
+
+      if (validationResult.success) {
+        if (formRef.current) {
+          formRef.current.reset();
+          setValidationError(null);
+        }
+      } else {
+        setValidationError(validationResult.error.format());
+      }
+
       let imagePath: string | null = null;
       // check if user is null, throws error
       if (!user?.id) throw new Error("Unable to find user id or id is invalid");
@@ -208,20 +223,6 @@ function EditPost() {
     setPostTitle(e.target.value);
   }
 
-
-  async function action() {
-    const result = await postBlog()
-    if (result?.error) {
-      setValidationError(result?.error)
-    } else {
-      if (formRef.current) {
-        formRef.current.reset()
-        setValidationError(null)
-      }
-    }
-  }
-
-
   return (
     <div className={styles.container}>
       <div>
@@ -242,22 +243,18 @@ function EditPost() {
             <PostImage url={imageUrl} size={150} />
             {validationError?.title && (
               <div className={styles.inputWarning}>
-                {
-                  validationError?.title &&
-                  validationError.title._errors.map((error: string, index: number) => (
-                    <p key={index} className={styles.inputWarning}>
-                      {error}
-                    </p>
-                  ))
-                }
+                {validationError?.title &&
+                  validationError.title._errors.map(
+                    (error: string, index: number) => (
+                      <p key={index} className={styles.inputWarning}>
+                        {error}
+                      </p>
+                    )
+                  )}
               </div>
             )}
             <Input labelFor="featured-image" labelText="Featured Image">
-              <input
-                id="featured-image"
-                type="file"
-                accept="image/*"
-              />
+              <input id="featured-image" type="file" accept="image/*" />
             </Input>
           </div>
         </div>
@@ -266,14 +263,14 @@ function EditPost() {
 
         {validationError?.entry && (
           <div className={styles.inputWarning}>
-            {
-              validationError?.entry &&
-              validationError.entry._errors.map((error: string, index: number) => (
-                <p key={index} className={styles.inputWarning}>
-                  {error}
-                </p>
-              ))
-            }
+            {validationError?.entry &&
+              validationError.entry._errors.map(
+                (error: string, index: number) => (
+                  <p key={index} className={styles.inputWarning}>
+                    {error}
+                  </p>
+                )
+              )}
           </div>
         )}
 
