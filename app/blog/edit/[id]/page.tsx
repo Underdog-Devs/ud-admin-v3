@@ -36,7 +36,6 @@ function EditPost() {
   const formRef = useRef<HTMLFormElement>(null);
 
   const supabase = createClientComponentClient();
-  const router = useRouter();
 
   const tipTapEditor = useEditor({
     extensions: [
@@ -254,8 +253,16 @@ function EditPost() {
               </div>
             )}
             <Input labelFor="featured-image" labelText="Featured Image">
-              <input id="featured-image" type="file" accept="image/*" />
+              <input
+                onChange={handleFiles}
+                id="featured-image"
+                type="file"
+                accept="image/*"
+              />
             </Input>
+            {fileSizeWarning && (
+              <p style={{ color: "red" }}>{fileSizeWarning}</p>
+            )}
           </div>
         </div>
 
