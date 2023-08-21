@@ -39,9 +39,7 @@ export function PostImage({
     if (url) downloadImage(url);
   }, [url, supabase]);
 
-  const uploadImage: React.ChangeEventHandler<HTMLInputElement> = async (
-    event
-  ) => {
+  async function uploadImage(event: React.ChangeEvent<HTMLInputElement>) {
     try {
       setUploading(true);
 
@@ -67,7 +65,7 @@ export function PostImage({
     } finally {
       setUploading(false);
     }
-  };
+  }
 
   return (
     <div className={styles.container}>
