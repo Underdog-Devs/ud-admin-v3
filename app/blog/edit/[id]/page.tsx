@@ -138,6 +138,7 @@ function EditPost() {
         }
       } else {
         setValidationError(validationResult.error.format());
+        throw new Error("Validation failed");
       }
 
       let imagePath: string | null = null;
