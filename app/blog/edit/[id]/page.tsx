@@ -31,6 +31,8 @@ function EditPost() {
   const [entry, setEntry] = useState<JSONContent | null>(null);
   const [postUpdateError, setPostUpdateError] = useState<Error | null>(null);
   const [updated, setUpdated] = useState<boolean>(false);
+  const [validationError, setValidationError] = useState<any>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -88,7 +90,7 @@ function EditPost() {
       }
     }
   }
-
+      
   async function getUser() {
     try {
       const { data, error } = await supabase.auth.getUser();
@@ -206,6 +208,20 @@ function EditPost() {
     setPostTitle(e.target.value);
   }
 
+
+  async function action() {
+    const result = await postBlog()
+    if (result?.error) {
+      setValidationError(result?.error)
+    } else {
+      if (formRef.current) {
+        formRef.current.reset()
+        setValidationError(null)
+      }
+    }
+  }
+
+
   return (
     <div className={styles.container}>
       <div>
@@ -224,21 +240,42 @@ function EditPost() {
               />
             </Input>
             <PostImage url={imageUrl} size={150} />
+            {validationError?.title && (
+              <div className={styles.inputWarning}>
+                {
+                  validationError?.title &&
+                  validationError.title._errors.map((error: string, index: number) => (
+                    <p key={index} className={styles.inputWarning}>
+                      {error}
+                    </p>
+                  ))
+                }
+              </div>
+            )}
             <Input labelFor="featured-image" labelText="Featured Image">
               <input
-                onChange={handleFiles}
                 id="featured-image"
                 type="file"
                 accept="image/*"
               />
             </Input>
-            {fileSizeWarning && (
-              <p style={{ color: "red" }}>{fileSizeWarning}</p>
-            )}
           </div>
         </div>
 
         <TipTapEdit editor={tipTapEditor} />
+
+        {validationError?.entry && (
+          <div className={styles.inputWarning}>
+            {
+              validationError?.entry &&
+              validationError.entry._errors.map((error: string, index: number) => (
+                <p key={index} className={styles.inputWarning}>
+                  {error}
+                </p>
+              ))
+            }
+          </div>
+        )}
 
         <div className={styles.buttons}>
           <button type="submit" disabled={updating}>
