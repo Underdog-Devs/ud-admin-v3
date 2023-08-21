@@ -169,6 +169,8 @@ function EditPost() {
         if (error) {
           throw error;
         }
+
+        setImageUrl(data.path);
         return data.path;
       }
     } catch (error) {
@@ -187,7 +189,8 @@ function EditPost() {
       if (error) {
         throw error;
       }
-
+      // The file's path hasn't changed, we do this just to fire off a new render
+      setImageUrl(filePath);
       return filePath;
     } catch (error) {
       console.log("Error replacing image in storage: ", error);
