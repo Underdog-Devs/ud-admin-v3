@@ -14,7 +14,7 @@ import TipTapEdit from "@/components/blog/tiptapEditor/tiptap-edit";
 import styles from "./create.module.scss";
 import Nav from "@/components/dashboard/nav";
 import { Input } from "@/components/input";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 function CreatePost() {
   const [entry, setEntry] = useState<JSONContent | null>(null);
@@ -29,6 +29,7 @@ function CreatePost() {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const supabase = createClientComponentClient();
+  const router = useRouter();
 
   useEffect(() => {
     getUser();
@@ -123,7 +124,8 @@ function CreatePost() {
       if (postInsertError) {
         throw postInsertError;
       }
-      redirect("/blog");
+      // client side redirect to blog page
+      router.push("/blog");
     } catch (error: any) {
       setPostCreationError(error);
       setSubmitting(false);
