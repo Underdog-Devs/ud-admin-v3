@@ -85,6 +85,11 @@ function CreatePost() {
     },
   });
 
+  function handleSubmit() {
+    setSubmitting(true);
+    postBlog();
+  }
+
   // image filepath, user id, editor and editor entry, first paragraph, post title
   async function postBlog() {
     try {
@@ -140,7 +145,7 @@ function CreatePost() {
       <div>
         <Nav />
       </div>
-      <form className={styles.main} action={postBlog}>
+      <form className={styles.main} action={handleSubmit}>
         <div className={styles.topContainer}>
           <div>
             <Input labelFor="title" labelText="Title" required>
