@@ -184,7 +184,7 @@ function EditPost() {
     try {
       const { error } = await supabase.storage
         .from("images")
-        .upload(filePath, file);
+        .update(filePath, file);
 
       if (error) {
         throw error;
