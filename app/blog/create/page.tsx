@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRootContext } from '../../context/RootContext'
 import StarterKit from '@tiptap/starter-kit';
+import { useRouter } from "next/navigation";
 import Highlight from '@tiptap/extension-highlight';
 import Typography from '@tiptap/extension-typography';
 import { Image as tiptapImage } from '@tiptap/extension-image';
@@ -21,6 +21,7 @@ function CreatePost() {
     const [validationError, setValidationError] = useState<any>(null);
 	const formRef = useRef<HTMLFormElement>(null);
 
+	const router = useRouter();
 	let file: File | null = null;
 	const supabase = createClientComponentClient()
 
@@ -107,6 +108,8 @@ function CreatePost() {
 			image
 		})
 
+
+        router.refresh()
 		if (!error) {
 			redirect('/blog');
 		}

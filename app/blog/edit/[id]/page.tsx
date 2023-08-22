@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import StarterKit from "@tiptap/starter-kit";
+import { useRouter } from "next/navigation";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import { Image as tiptapImage } from "@tiptap/extension-image";
@@ -22,6 +23,7 @@ function EditPost() {
   const [didFetch, setDidFetch] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   const supabase = createClientComponentClient();
 
@@ -81,6 +83,8 @@ function EditPost() {
       first_paragraph: firstParagraph,
       image,
     });
+
+    router.refresh();
     if (!error) {
       redirect("/blog");
     }
