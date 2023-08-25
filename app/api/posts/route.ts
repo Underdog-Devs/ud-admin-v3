@@ -11,13 +11,9 @@ export async function GET(request: Request) {
 
   const { data: posts } = await supabase
     .from("posts")
-    .select(
-      `
-                  *,
-                  authors ( name )
-            `
-    )
+    .select(`*,authors ( name )`)
     .eq("author", userId)
+    .order("created_at", { ascending: false })
     .range(from, from + 6);
   return NextResponse.json({
     posts,
