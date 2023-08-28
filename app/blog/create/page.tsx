@@ -124,7 +124,7 @@ function CreatePost() {
       if (postInsertError) {
         throw postInsertError;
       }
-      // client side redirect to blog page
+      router.refresh()
       router.push("/blog");
     } catch (error: any) {
       setPostCreationError(error);

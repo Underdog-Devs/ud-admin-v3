@@ -6,6 +6,12 @@ import { BsTwitter, BsFacebook } from "react-icons/bs";
 import styles from "./post.module.scss";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useParams } from "next/navigation";
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Highlight from '@tiptap/extension-highlight';
+import Typography from '@tiptap/extension-typography';
+import { Image as TipTapImage } from '@tiptap/extension-image';
+import TextAlign from '@tiptap/extension-text-align';
 
 const PostPage = () => {
   const { id } = useParams();
@@ -17,14 +23,29 @@ const PostPage = () => {
 		http://www.underdogdevs.org/blog/${postId}
 		`;
   };
+  
+	const editor = useEditor({
+		editable: false,
+		content: '',
+		extensions: [
+			StarterKit,
+			Highlight,
+			Typography,
+			TipTapImage,
+			TextAlign.configure({
+				types: ['heading', 'paragraph'],
+			}),
+		],
+	});
 
   useEffect(() => {
     getPosts();
-  }, [supabase]);
+  }, [supabase, editor]);
 
   // useEffect(() => {
   //   if (post?.image) getImage(post.image);
   // }, [supabase, post]);
+
 
   async function getPosts() {
     try {
@@ -38,9 +59,11 @@ const PostPage = () => {
         throw error;
       }
 
-      if (data) {
+      console.log(data.entry)
+      if (data && editor) {
         setPosts(data);
         getImage(data.image);
+        editor.commands.setContent(data.entry)
       }
     } catch (error) {
       // if in dev mode, log error
@@ -83,6 +106,7 @@ const PostPage = () => {
 
     return (
       <div
+        className={styles.container}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -92,45 +116,40 @@ const PostPage = () => {
         }}
       >
         <header style={{ display: "flex", gap: "2rem" }}>
-          <Link passHref href="/blog">
+          <Link passHref href="/blog" className={styles.backButton}>
             Back
           </Link>
 
           <h3>{postTitle}</h3>
 
-          <ul style={{ display: "flex", gap: "1rem" }}>
-            <p>Share</p>
-            <li>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${twitterText(
-                  postTitle,
-                  postId
-                )}`}
-              >
-                <BsTwitter style={{ color: "#1D9BF0", cursor: "pointer" }} />
-              </a>
-            </li>
-            <li>
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=http://www.underdogdevs.org/blog/${postId}`}
-              >
-                <BsFacebook style={{ color: "#1B74E4", cursor: "pointer" }} />
-              </a>
-            </li>
-          </ul>
+          <ul className={styles.socialContainer}>
+						<p>Share</p>
+						<li>
+							<a
+								href={`https://twitter.com/intent/tweet?text=${twitterText(postTitle, postId)}`}
+							>
+								<BsTwitter style={{ color: '#1D9BF0', cursor: 'pointer' }} />
+							</a>
+						</li>
+						<li>
+							<a
+								href={`https://www.facebook.com/sharer/sharer.php?u=http://www.underdogdevs.org/blog/${postId}`}
+							>
+								<BsFacebook style={{ color: '#1B74E4', cursor: 'pointer' }} />
+							</a>
+						</li>
+					</ul>
         </header>
-
         <Image
           width={600}
           height={600}
-          className={styles.img}
           src={imageUrl ?? "/images/fallback.png"}
           alt={imageUrl ? "Post image" : "Post image not found"}
           style={{ objectFit: "contain" }}
           loading="lazy"
         />
 
-        <p>{post.first_paragraph}</p>
+				<EditorContent className={styles.blogText} editor={editor} />
 
         <div className={styles.blogMain}>
           <section className={styles.blogInfo}>

@@ -34,6 +34,7 @@ function EditPost() {
   const [updated, setUpdated] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<any>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   const supabase = createClientComponentClient();
 
@@ -166,6 +167,7 @@ function EditPost() {
       if (updatePostError) {
         throw updatePostError;
       }
+      router.refresh()
       setUpdated(true);
     } catch (error: any) {
       setPostUpdateError(error);

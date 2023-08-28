@@ -19,7 +19,7 @@ export default async function RootLayout({
       <body>
         <main className="min-h-screen bg-background flex flex-col items-center">
           <RootContextProvider>
-            <NavBar  user={user?user:null}/>
+            <NavBar user={user?user:null}/>
             {children}
           </RootContextProvider>
         </main>

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './details.module.scss';
+import { useRouter } from "next/navigation";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface Props {
   id: string;
@@ -13,17 +15,23 @@ function Details(props: Props) {
 	const { id, date, author } = props;
 	const [deleteMessage, setDeleteMessage] = useState(false);
 	const [deleteSuccess, setDeleteSuccess] = useState(false);
+	const router = useRouter();
 
 	const deletePost = async () => {
-		//try {
-		//	const res = await axios.post('/api/blog/delete', {
-		//		id,
-		//	});
-		//	setDeleteSuccess(true);
-		//	console.log(res);
-		//} catch (error) {
-		//	console.error(error);
-		//}
+		const supabase = createClientComponentClient()
+
+		try {
+		const { error } = await supabase
+				.from('posts')
+				.delete()
+				.eq('id', id)
+		if(!error) {
+			router.refresh();
+			setDeleteMessage(false);
+		}
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	const toggleDeleteMessage = () => {
@@ -52,11 +60,11 @@ function Details(props: Props) {
 							</div>
 						</div>
 					) : (
-						<li onClick={toggleDeleteMessage}>
+						<li className={styles.deleteButton} onClick={toggleDeleteMessage}>
 							Delete
 						</li>
 					)}
-					<li>
+					<li className={styles.editButton}>
 						<Link href={`/blog/edit/${id}`}>
 							Edit
 						</Link>

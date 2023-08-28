@@ -23,6 +23,11 @@
     position: relative;
     width: 60%;
     margin-bottom: $space-lg;
+    
+    .backButton {
+      padding-top: 30px;
+      top: 40px;
+    }
 
     @include for-phone-only {
       width: 80%;
@@ -55,6 +60,7 @@
       left: -$space-xxl;
       text-align: center;
       margin: 0;
+      top: 30px;
 
       @include for-phone-only {
         display: flex;
@@ -149,6 +155,7 @@
 
   .blogMain {
     width: 80%;
+    margin-bottom: 40px;
 
     .blogImage {
       // padding: $space-md;

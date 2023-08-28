@@ -40,7 +40,7 @@ async function NavBar({ user }: any) {
 					<div className={styles.navigationLinks}>
 						{user ? (
 							<div className="flex items-center gap-4">
-								<div>{user.email}!</div>
+								<div>{user.email}</div>
 								<LogoutButton />
 							</div>
 						) : (
