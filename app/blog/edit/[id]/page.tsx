@@ -17,6 +17,7 @@ import { Input } from "@/components/input";
 import { useParams } from "next/navigation";
 import { PostImage } from "@/components/blog/PostImage";
 import { PostBlogSchema } from "@/lib/schema";
+import { useRouter } from "next/navigation";
 
 function EditPost() {
   const { id } = useParams();
@@ -166,7 +167,7 @@ function EditPost() {
       if (updatePostError) {
         throw updatePostError;
       }
-      router.refresh()
+      router.refresh();
       setUpdated(true);
     } catch (error: any) {
       setPostUpdateError(error);
