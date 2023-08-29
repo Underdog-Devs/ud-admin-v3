@@ -27,6 +27,8 @@ const emailValidation = nonEmptyString.and(
     })
 );
 
+
+
 const stringLengthRange = (min: number, max: number) => 
     nonEmptyString
     .refine(value => value.length >= min, { message: minCharMessage(min) })
@@ -38,11 +40,21 @@ const signUpValidation = z
     .object({
         email: emailValidation,
         password: passwordValidation,
-        passwordRepeat: passwordValidation,
+        confirmPassword: passwordValidation,
     })
-    .refine(data => data.password === data.passwordRepeat, {
+    .refine(data => data.password === data.confirmPassword, {
         message: "Passwords do not match",
-        path: ["passwordRepeat"],
+        path: ["confirmPassword"],
+    });
+
+const passwordResetValidation = z
+    .object({
+        password: passwordValidation,
+        confirmPassword: passwordValidation,
+    })
+    .refine(data => data.password === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
     });
 
 export const AuthenticationSchema = {
@@ -50,7 +62,5 @@ export const AuthenticationSchema = {
         email: emailValidation,
     }),
     signUp: signUpValidation,
-    reset: z.object({
-        email: emailValidation,
-    }),
+    passwordReset: passwordResetValidation
 };
