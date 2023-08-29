@@ -14,7 +14,6 @@ import TipTapEdit from "@/components/blog/tiptapEditor/tiptap-edit";
 import styles from "./edit.module.scss";
 import Nav from "@/components/dashboard/nav";
 import { Input } from "@/components/input";
-import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { PostImage } from "@/components/blog/PostImage";
 import { PostBlogSchema } from "@/lib/schema";
@@ -201,16 +200,23 @@ function EditPost() {
 
   async function replaceCurrentImage(filePath: string, file: File) {
     try {
+      // Remove old image
       const { error } = await supabase.storage
         .from("images")
-        .update(filePath, file);
+        .remove([imageUrl!]);
 
       if (error) {
         throw error;
       }
-      // The file's path hasn't changed, we do this just to fire off a new render
-      setImageUrl(filePath);
-      return filePath;
+
+      // Upload new image
+      const newImagePath = await uploadNewImage(file);
+
+      // Render new image
+      setImageUrl(newImagePath);
+
+      // Return new image path to be saved in post table
+      return newImagePath;
     } catch (error) {
       console.log("Error replacing image in storage: ", error);
       return null;

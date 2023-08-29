@@ -8,11 +8,13 @@ import Nav from "@/components/dashboard/nav";
 
 async function fetchPosts(id: string): Promise<Post[]> {
   const response = await fetch(
-      `${process.env.NEXT_PUBLIC_HOSTNAME}/api/posts?id=${id}`
-    );
-    const data = await response.json();
-    return data.posts;
-  }
+    `${process.env.NEXT_PUBLIC_HOSTNAME}/api/posts?id=${id}`,
+    { cache: "no-cache" }
+  );
+  const data = await response.json();
+  return data.posts;
+}
+
 
 export default async function PostsPage() {
   const supabase = createServerComponentClient({ cookies });
