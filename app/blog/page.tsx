@@ -5,11 +5,11 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Nav from "@/components/dashboard/nav";
-import { BsSlashLg } from "react-icons/bs";
 
 async function fetchPosts(id: string): Promise<Post[]> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_HOSTNAME}/api/posts?id=${id}`
+    `${process.env.NEXT_PUBLIC_HOSTNAME}/api/posts?id=${id}`,
+    { cache: "no-cache" }
   );
   const data = await response.json();
   return data.posts;
