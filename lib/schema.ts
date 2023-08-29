@@ -19,3 +19,38 @@ export const PostBlogSchema = z.object({
     title: stringMin(4).and(stringMax(240)).and(nonEmptyString),
     entry: nonEmptyString,
 });
+
+
+const emailValidation = nonEmptyString.and(
+    z.string().email({
+        message: "Invalid email address",
+    })
+);
+
+const stringLengthRange = (min: number, max: number) => 
+    nonEmptyString
+    .refine(value => value.length >= min, { message: minCharMessage(min) })
+    .refine(value => value.length <= max, { message: maxCharMessage(max) });
+
+const passwordValidation = stringLengthRange(8, 128);
+
+const signUpValidation = z
+    .object({
+        email: emailValidation,
+        password: passwordValidation,
+        passwordRepeat: passwordValidation,
+    })
+    .refine(data => data.password === data.passwordRepeat, {
+        message: "Passwords do not match",
+        path: ["passwordRepeat"],
+    });
+
+export const AuthenticationSchema = {
+    signIn: z.object({
+        email: emailValidation,
+    }),
+    signUp: signUpValidation,
+    reset: z.object({
+        email: emailValidation,
+    }),
+};

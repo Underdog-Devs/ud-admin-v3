@@ -15,6 +15,7 @@ async function fetchPosts(id: string): Promise<Post[]> {
   return data.posts;
 }
 
+
 export default async function PostsPage() {
   const supabase = createServerComponentClient({ cookies });
 
@@ -25,6 +26,7 @@ export default async function PostsPage() {
   if (!user) {
     redirect("/login");
   }
+
   const posts = await fetchPosts(user.id);
 
   return (

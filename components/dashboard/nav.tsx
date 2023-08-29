@@ -14,7 +14,7 @@ function Nav() {
 					<Link href="/blog/">View All</Link>
 				</li>
 			</div>
-			<div>
+			{/* <div>
 				<h4>Spotlight</h4>
 				<li>
 					<Link href="/spotlight/create">Create</Link>
@@ -31,7 +31,7 @@ function Nav() {
 				<li>
 					<Link href="/testimonials/">View All</Link>
 				</li>
-			</div> 
+			</div>  */}
 		</ul>
 	);
 }

@@ -21,7 +21,10 @@ async function Dashboard() {
 
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("*, authors(name)");
+    .select("*, authors(name)")
+    .eq("author", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5)
 
   if (!error) {
     return (

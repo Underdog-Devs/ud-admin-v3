@@ -90,6 +90,9 @@ p {
 a {
 	color: $udOrange;
   text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 button {
