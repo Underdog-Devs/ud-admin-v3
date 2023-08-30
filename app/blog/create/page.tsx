@@ -86,7 +86,8 @@ function CreatePost() {
     },
   });
 
-  function handleSubmit() {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setSubmitting(true);
     postBlog();
   }
@@ -107,10 +108,10 @@ function CreatePost() {
         const { error: uploadError } = await supabase.storage
           .from("images")
           .upload(imagePath, file);
-
         if (uploadError) {
           throw uploadError;
         }
+        console.log(uploadError)
       }
       // attempt to add post to DB, throws error
       const { error: postInsertError } = await supabase.from("posts").insert({
@@ -147,7 +148,7 @@ function CreatePost() {
       <div>
         <Nav />
       </div>
-      <form className={styles.main} action={handleSubmit}>
+      <form className={styles.main} onSubmit={handleSubmit}>
         <div className={styles.topContainer}>
           <div>
             <Input labelFor="title" labelText="Title" required>
