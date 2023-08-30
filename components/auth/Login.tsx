@@ -46,7 +46,7 @@ export function Login() {
                 </div>
             ) : (
                 <div className={styles.formContainer}>
-                    <h4 className={styles.title}>Login</h4>
+                    <h4 className={styles.title}>{view!=='reset'?"Login":"Forgot Password?"}</h4>
                     <form className={styles.form} onSubmit={view==='sign-in'?handleSignIn:resetPassword}>
                         <div className={styles.formField}>
                             <input
@@ -75,7 +75,7 @@ export function Login() {
                         </div>}
                         <div className={styles.formActions}>
                         {view!=='reset'?<span className={`${styles.passwordResetLink} ${styles.formButton}`} onClick={()=>setView('reset')}>Forgot Password?</span>:<span className={`${styles.passwordResetLink} ${styles.formButton}`} onClick={()=>setView('sign-in')}>Sign In</span>}
-                            <button type="submit" className={styles.formButton}>Submit</button>
+                            <button type="submit" className={styles.formButton}>{view!=='reset'?"Submit":"Reset"}</button>
                         </div>
                     </form>
                 </div>)}
