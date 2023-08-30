@@ -10,6 +10,7 @@ function Post({ post }: { post: any }) {
   const { id, title, image, first_paragraph, created_at } = post;
   const supabase = createClientComponentClient();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [postDeleted, setPostDeleted] = useState<boolean>(false);
 
   useEffect(() => {
     if (image) downloadImage(image);
@@ -36,6 +37,10 @@ function Post({ post }: { post: any }) {
       postTitle = `${postTitle.slice(0, 70)}...`;
     }
     return postTitle;
+  }
+
+  if (postDeleted) {
+    return <div style={{ display: "none" }}></div>;
   }
 
   return (
@@ -70,7 +75,7 @@ function Post({ post }: { post: any }) {
           </Link>
         </h3>
         {first_paragraph}
-        <Details id={id} date={created_at} />
+        <Details id={id} date={created_at} setPostDeleted={setPostDeleted} />
       </div>
     </div>
   );
