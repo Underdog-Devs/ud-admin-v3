@@ -6,6 +6,8 @@
 
 ## What kind of change does this PR introduce?
 
+<!-- Delete the options that you don't choose. -->
+
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
@@ -13,7 +15,7 @@
 
 ## What is the current behavior?
 
-_You can also link to an open issue here_
+<!-- You can also link to an open issue here -->
 
 ## What is the new behavior?
 

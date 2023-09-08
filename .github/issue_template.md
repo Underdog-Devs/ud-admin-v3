@@ -1,22 +1,22 @@
 Issue tracker is **ONLY** used for reporting bugs. New features should be discussed on our discussion tab via **general** discussion.
 
-_Provide a general summary of the issue in the Title above_
+<!-- Provide a general summary of the issue in the Title above -->
 
 ## Expected Behavior
 
-_Describe what should happen_
+<!-- Describe what should happen -->
 
 ## Current Behavior
 
-_Describe what happens instead of the expected behavior_
+<!-- Describe what happens instead of the expected behavior -->
 
 ## Possible Solution
 
-_Not obligatory, but suggest a fix/reason for the bug_
+<!-- Not obligatory, but suggest a fix/reason for the bug -->
 
 ## Steps to Reproduce
 
-_Provide a link to a live example, or an unambiguous set of steps to reproduce this bug. Include code to reproduce, if relevant_
+<!-- Provide a link to a live example, or an unambiguous set of steps to reproduce this bug. Include code to reproduce, if relevant -->
 
 1.
 2.
@@ -25,13 +25,13 @@ _Provide a link to a live example, or an unambiguous set of steps to reproduce t
 
 ## Context (Environment)
 
-_How has this issue affected you? What are you trying to accomplish?_
-_Providing context helps us come up with a solution that is most useful in the real world_
+<!-- How has this issue affected you? What are you trying to accomplish? -->
+<!-- Providing context helps us come up with a solution that is most useful in the real world -->
 
 ## Detailed Description
 
-_Provide a detailed description of the change or addition you are proposing_
+<!-- Provide a detailed description of the change or addition you are proposing -->
 
 ## Possible Implementation
 
-_Not obligatory, but suggest an idea for implementing addition or change_
+<!-- Not obligatory, but suggest an idea for implementing addition or change -->
