@@ -149,6 +149,7 @@ function EditPost() {
       if (!tipTapEditor) throw new Error("Editor failed to load");
       // if file exists, user used the picker to set it
       // attempt to upload image and get url, throws error
+      console.log("file is: ", file);
       if (file) {
         imagePath = imageUrl
           ? await replaceCurrentImage(imageUrl, file)
@@ -237,7 +238,7 @@ function EditPost() {
       <div>
         <Nav />
       </div>
-      <form className={styles.main} action={updateBlogPost}>
+      <form className={styles.main} onSubmit={updateBlogPost}>
         <div className={styles.topContainer}>
           <div>
             <Input labelFor="title" labelText="Title">
