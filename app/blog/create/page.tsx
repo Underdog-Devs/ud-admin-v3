@@ -81,7 +81,12 @@ function CreatePost() {
     onUpdate() {
       if (tipTapEditor) {
         setEntry(tipTapEditor.getJSON());
-        setFirstParagraph(tipTapEditor.getText());
+        let text = tipTapEditor.getText();
+
+        if (text.length > 300) {
+          text = text.substring(0, 300) + "...";
+        }
+        setFirstParagraph(text);
       }
     },
   });
@@ -111,7 +116,7 @@ function CreatePost() {
         if (uploadError) {
           throw uploadError;
         }
-        console.log(uploadError)
+        console.log(uploadError);
       }
       // attempt to add post to DB, throws error
       const { error: postInsertError } = await supabase.from("posts").insert({
@@ -125,7 +130,7 @@ function CreatePost() {
       if (postInsertError) {
         throw postInsertError;
       }
-      router.refresh()
+      router.refresh();
       router.push("/blog");
     } catch (error: any) {
       setPostCreationError(error);
