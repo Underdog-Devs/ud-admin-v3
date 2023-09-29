@@ -49,9 +49,16 @@ function EditPost() {
       }),
     ],
     onUpdate() {
-      setEntry(tipTapEditor?.getJSON() ?? {});
-      setFirstParagraph(tipTapEditor?.getText() ?? "");
-      setUpdated(false);
+      if (tipTapEditor) {
+        setEntry(tipTapEditor.getJSON());
+        let text = tipTapEditor.getText();
+
+        if (text.length > 300) {
+          text = text.substring(0, 300) + "...";
+        }
+        setFirstParagraph(text);
+        setUpdated(false);
+      }
     },
   });
 
@@ -61,8 +68,7 @@ function EditPost() {
   }, [supabase]);
 
   useEffect(() => {
-    tipTapEditor?.commands.setContent(firstParagraph);
-    setEntry(tipTapEditor?.getJSON() ?? {});
+    tipTapEditor?.commands.setContent(entry);
   }, [didFetch]);
 
   async function getPost() {
@@ -79,6 +85,7 @@ function EditPost() {
 
       setPostTitle(data.title);
       setFirstParagraph(data.entry.content[0].content[0].text);
+      setEntry(data.entry);
       setImageUrl(data.image || null);
       setDidFetch(true);
     } catch (error) {
@@ -112,20 +119,22 @@ function EditPost() {
       setFile(null);
       return;
     }
-    const file = event.target.files[0];
+    const newFile = event.target.files[0];
     // Check file size and set warning if it's too large
-    if (file && file.size > 1572864) {
+    if (newFile && newFile.size > 1572864) {
       setFileSizeWarning(
         "File size exceeds 1.5MB. Please choose a smaller file."
       );
       setFile(null);
     } else {
       setFileSizeWarning(null);
-      setFile(file);
+      setFile(newFile);
     }
   }
 
-  async function updateBlogPost() {
+  async function updateBlogPost(event: React.FormEvent<HTMLFormElement>) {
+    // TODO: Fix image being removed on text edit
+    event.preventDefault();
     try {
       const validationResult = PostBlogSchema.safeParse({
         title: postTitle,
@@ -203,6 +212,7 @@ function EditPost() {
   async function replaceCurrentImage(filePath: string, file: File) {
     try {
       // Remove old image
+      // TODO: Why is filePath not being used?
       const { error } = await supabase.storage
         .from("images")
         .remove([imageUrl!]);
