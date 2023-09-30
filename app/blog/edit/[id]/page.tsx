@@ -163,6 +163,8 @@ function EditPost() {
         imagePath = imageUrl
           ? await replaceCurrentImage(imageUrl, file)
           : await uploadNewImage(file);
+      } else {
+        imagePath = imageUrl;
       }
 
       // attempt to update post
@@ -212,10 +214,9 @@ function EditPost() {
   async function replaceCurrentImage(filePath: string, file: File) {
     try {
       // Remove old image
-      // TODO: Why is filePath not being used?
       const { error } = await supabase.storage
         .from("images")
-        .remove([imageUrl!]);
+        .remove([filePath]);
 
       if (error) {
         throw error;
