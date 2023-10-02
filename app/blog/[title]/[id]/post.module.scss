@@ -89,14 +89,14 @@
     position: relative;
     margin-bottom: $space-md;
     @include for-phone-only {
-      width: 250px;
-      height: 200px;
-      max-height: 300px;
+      width: 100%;
+      height: calc(75vw);
+      max-height: 600px;
     }
     @include for-tablet-up {
-      width: 400px;
-      height: 300px;
-      max-height: 300px;
+      width: 100%;
+      height: calc(50vw);
+      max-height: 600px;
     }
   }
 
