@@ -133,7 +133,6 @@ function EditPost() {
   }
 
   async function updateBlogPost(event: React.FormEvent<HTMLFormElement>) {
-    // TODO: Fix image being removed on text edit
     event.preventDefault();
     try {
       const validationResult = PostBlogSchema.safeParse({
