@@ -143,7 +143,6 @@ const PostPage = () => {
           </ul>
         </header>
         <div className={styles.blogImageContainer}>
-          {/* TODO: Fix dynamic sizing on this image */}
           <Image
             fill
             src={imageUrl ?? "/images/fallback.png"}
