@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 function EditPost() {
   const { id } = useParams();
   const [postTitle, setPostTitle] = useState("Loading...");
+  const postTitleRef = useRef<string | null>(null);
   const [didFetch, setDidFetch] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const file = useRef<File | null>(null);
@@ -98,6 +99,7 @@ function EditPost() {
       }
 
       setPostTitle(data.title);
+      postTitleRef.current = data.title;
       setEntry(data.entry);
       setImageUrl(data.image || null);
       setPublished(data.published);
@@ -155,7 +157,7 @@ function EditPost() {
     setSaveStatus("Saving...");
     try {
       const validationResult = PostBlogSchema.safeParse({
-        title: postTitle,
+        title: postTitleRef.current,
         entry: tipTapEditor?.getJSON()?.content?.[0]?.content?.[0]?.text,
       });
 
@@ -190,7 +192,7 @@ function EditPost() {
         id,
         entry: tipTapEditor?.getJSON() ?? {},
         author: user?.id,
-        title: postTitle,
+        title: postTitleRef.current,
         first_paragraph: tipTapEditor?.getText() ?? "",
         image: imagePath,
         published: publishedRef.current,
@@ -278,6 +280,7 @@ function EditPost() {
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
+    postTitleRef.current = e.target.value;
     debounce(timer);
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   User,
   createClientComponentClient,
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 function CreatePost() {
   const [postTitle, setPostTitle] = useState<string | null>(null);
+  const postTitleRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeWarning, setFileSizeWarning] = useState<string | null>(null);
@@ -155,7 +156,7 @@ function CreatePost() {
       .insert({
         entry,
         author: user?.id,
-        title: postTitle,
+        title: postTitleRef.current,
         first_paragraph:
           firstParagraph?.length > 300
             ? firstParagraph?.substring(0, 300) + "..."
@@ -184,7 +185,7 @@ function CreatePost() {
       id,
       entry,
       author: user?.id,
-      title: postTitle,
+      title: postTitleRef.current,
       first_paragraph:
         firstParagraph.length > 300
           ? firstParagraph.substring(0, 300) + "..."
@@ -205,6 +206,7 @@ function CreatePost() {
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
+    postTitleRef.current = e.target.value;
     debounce(timer);
   }
 
