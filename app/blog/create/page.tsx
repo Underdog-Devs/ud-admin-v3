@@ -31,7 +31,7 @@ function CreatePost() {
   >(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [id, setId] = useState<string | null>(null);
-  const [timer, setTimer] = useState<any>(null);
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -40,13 +40,12 @@ function CreatePost() {
     getUser();
   }, [supabase]);
 
-  function debounce(timer: NodeJS.Timeout | null) {
+  function debounce() {
     console.log("Change Event");
-    if (timer) {
-      clearTimeout(timer);
+    if (timer.current) {
+      clearTimeout(timer.current);
     }
-    const newTimer = setTimeout(postBlog, 5000);
-    setTimer(newTimer);
+    timer.current = setTimeout(postBlog, 5000);
   }
 
   async function getUser() {
@@ -95,7 +94,7 @@ function CreatePost() {
     ],
     onUpdate() {
       if (tipTapEditor) {
-        debounce(timer);
+        debounce();
       }
     },
   });
@@ -201,13 +200,13 @@ function CreatePost() {
 
   function eraseBlog() {
     tipTapEditor?.commands.clearContent();
-    debounce(timer);
+    debounce();
   }
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
     postTitleRef.current = e.target.value;
-    debounce(timer);
+    debounce();
   }
 
   return (

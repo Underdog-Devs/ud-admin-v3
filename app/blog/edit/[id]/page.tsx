@@ -32,7 +32,7 @@ function EditPost() {
   const [entry, setEntry] = useState<JSONContent | null>(null);
   const [postUpdateError, setPostUpdateError] = useState<Error | null>(null);
   const [validationError, setValidationError] = useState<any>(null);
-  const [timer, setTimer] = useState<any>(null);
+  const timer = useRef<NodeJS.Timeout | null>(null);
   const [saveStatus, setSaveStatus] = useState<"Saving..." | "Saved" | null>(
     null
   );
@@ -60,7 +60,7 @@ function EditPost() {
       if (tipTapEditor) {
         setUpdated(false);
         setSaveStatus(null);
-        debounce(timer);
+        debounce();
       }
     },
   });
@@ -74,16 +74,16 @@ function EditPost() {
     tipTapEditor?.commands.setContent(entry);
   }, [didFetch]);
 
-  function debounce(timer: NodeJS.Timeout | null) {
-    if (published) {
+  function debounce() {
+    if (publishedRef.current) {
       return;
     }
 
-    if (timer) {
-      clearTimeout(timer);
+    if (timer.current) {
+      clearTimeout(timer.current);
     }
 
-    setTimer(setTimeout(updateBlogPost, 5000));
+    timer.current = setTimeout(updateBlogPost, 5000);
   }
 
   async function getPost() {
@@ -268,20 +268,20 @@ function EditPost() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setUpdating(true);
-    clearTimeout(timer);
-    setTimer(null);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
     updateBlogPost();
   }
 
   function eraseBlog() {
     tipTapEditor?.commands.clearContent();
-    debounce(timer);
+    debounce();
   }
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
     postTitleRef.current = e.target.value;
-    debounce(timer);
+    debounce();
   }
 
   function unPublish() {
