@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import styles from './navBar.module.scss';
 
-async function NavBar({ user }: any) {
+function NavBar({ user }: any) {
 	const [showLinks, setShowLinks] = useState(false);
 	const linksContainerRef = useRef<HTMLElement | null>(null);
 
