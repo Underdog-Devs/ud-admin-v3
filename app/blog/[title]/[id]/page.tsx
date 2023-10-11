@@ -18,9 +18,9 @@ const PostPage = () => {
   const supabase = createClientComponentClient();
   const [post, setPosts] = useState<any>();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const twitterText = (postTitle: string, postId: string) => {
+  const twitterText = (postTitle: string, link: string) => {
     return `${postTitle} \n
-		http://www.underdogdevs.org/blog/${postId}
+		http://www.underdogdevs.org${link}
 		`;
   };
 
@@ -127,7 +127,7 @@ const PostPage = () => {
               <a
                 href={`https://twitter.com/intent/tweet?text=${twitterText(
                   postTitle,
-                  postId
+                  postLink
                 )}`}
               >
                 <BsTwitter style={{ color: "#1D9BF0", cursor: "pointer" }} />
@@ -135,7 +135,7 @@ const PostPage = () => {
             </li>
             <li>
               <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=http://www.underdogdevs.org/blog/${postId}`}
+                href={`https://www.facebook.com/sharer/sharer.php?u=http://www.underdogdevs.org${postLink}`}
               >
                 <BsFacebook style={{ color: "#1B74E4", cursor: "pointer" }} />
               </a>

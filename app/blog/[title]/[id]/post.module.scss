@@ -87,7 +87,7 @@
 
   .blogImageContainer {
     position: relative;
-    margin-bottom: $space-md;
+    margin: $space-md 0;
     @include for-phone-only {
       width: 100%;
       height: calc(75vw);
