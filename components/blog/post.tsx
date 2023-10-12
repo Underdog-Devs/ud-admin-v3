@@ -7,7 +7,7 @@ import styles from "./post.module.scss";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 function Post({ post }: { post: any }) {
-  const { id, title, image, first_paragraph, created_at } = post;
+  const { id, title, image, first_paragraph, created_at, published } = post;
   const supabase = createClientComponentClient();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [postDeleted, setPostDeleted] = useState<boolean>(false);
@@ -75,7 +75,12 @@ function Post({ post }: { post: any }) {
           </Link>
         </h3>
         {first_paragraph}
-        <Details id={id} date={created_at} setPostDeleted={setPostDeleted} />
+        <Details
+          id={id}
+          date={created_at}
+          setPostDeleted={setPostDeleted}
+          published={published}
+        />
       </div>
     </div>
   );

@@ -11,10 +11,11 @@ interface Props {
   date: string;
   setPostDeleted: React.Dispatch<React.SetStateAction<boolean>>;
   author?: string;
+  published: boolean;
 }
 
 function Details(props: Props) {
-  const { id, date, author, setPostDeleted } = props;
+  const { id, date, author, setPostDeleted, published } = props;
   const [deleteMessage, setDeleteMessage] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const router = useRouter();
@@ -77,6 +78,11 @@ function Details(props: Props) {
         <li>
           <span>
             Posted on <span>{parsedDate}</span>
+          </span>
+        </li>
+        <li>
+          <span style={{ color: published ? "green" : "orange" }}>
+            {published ? "Published" : "Draft"}
           </span>
         </li>
       </ul>

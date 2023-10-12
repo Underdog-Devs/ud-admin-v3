@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   User,
@@ -21,18 +22,25 @@ import { useRouter } from "next/navigation";
 
 function EditPost() {
   const { id } = useParams();
-  const [firstParagraph, setFirstParagraph] = useState<string>("Loading...");
   const [postTitle, setPostTitle] = useState("Loading...");
+  const postTitleRef = useRef<string | null>(null);
   const [didFetch, setDidFetch] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const file = useRef<File | null>(null);
   const [fileSizeWarning, setFileSizeWarning] = useState<string | null>("");
-  const [updating, setUpdating] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const [entry, setEntry] = useState<JSONContent | null>(null);
   const [postUpdateError, setPostUpdateError] = useState<Error | null>(null);
-  const [updated, setUpdated] = useState<boolean>(false);
   const [validationError, setValidationError] = useState<any>(null);
+  const timer = useRef<NodeJS.Timeout | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"Saving..." | "Saved" | null>(
+    null
+  );
+  const [published, setPublished] = useState<boolean>(false);
+  const publishedRef = useRef<boolean>(false);
+  const [updating, setUpdating] = useState<boolean>(false);
+  const [updated, setUpdated] = useState<boolean>(false);
+  const fileChanged = useRef<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
 
@@ -50,14 +58,9 @@ function EditPost() {
     ],
     onUpdate() {
       if (tipTapEditor) {
-        setEntry(tipTapEditor.getJSON());
-        let text = tipTapEditor.getText();
-
-        if (text.length > 300) {
-          text = text.substring(0, 300) + "...";
-        }
-        setFirstParagraph(text);
         setUpdated(false);
+        setSaveStatus(null);
+        debounce();
       }
     },
   });
@@ -70,6 +73,18 @@ function EditPost() {
   useEffect(() => {
     tipTapEditor?.commands.setContent(entry);
   }, [didFetch]);
+
+  function debounce() {
+    if (publishedRef.current) {
+      return;
+    }
+
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+
+    timer.current = setTimeout(updateBlogPost, 5000);
+  }
 
   async function getPost() {
     try {
@@ -84,9 +99,11 @@ function EditPost() {
       }
 
       setPostTitle(data.title);
-      setFirstParagraph(data.entry.content[0].content[0].text);
+      postTitleRef.current = data.title;
       setEntry(data.entry);
       setImageUrl(data.image || null);
+      setPublished(data.published);
+      publishedRef.current = data.published;
       setDidFetch(true);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
@@ -116,7 +133,9 @@ function EditPost() {
   function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
     if (!event.target.files || event.target.files.length === 0) {
       setFileSizeWarning(null);
-      setFile(null);
+      file.current = null;
+      fileChanged.current = true;
+      updateBlogPost();
       return;
     }
     const newFile = event.target.files[0];
@@ -125,18 +144,20 @@ function EditPost() {
       setFileSizeWarning(
         "File size exceeds 1.5MB. Please choose a smaller file."
       );
-      setFile(null);
+      file.current = null;
     } else {
       setFileSizeWarning(null);
-      setFile(newFile);
+      file.current = newFile;
+      fileChanged.current = true;
+      updateBlogPost();
     }
   }
 
-  async function updateBlogPost(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function updateBlogPost() {
+    setSaveStatus("Saving...");
     try {
       const validationResult = PostBlogSchema.safeParse({
-        title: postTitle,
+        title: postTitleRef.current,
         entry: tipTapEditor?.getJSON()?.content?.[0]?.content?.[0]?.text,
       });
 
@@ -157,11 +178,11 @@ function EditPost() {
       if (!tipTapEditor) throw new Error("Editor failed to load");
       // if file exists, user used the picker to set it
       // attempt to upload image and get url, throws error
-      console.log("file is: ", file);
-      if (file) {
+      console.log("file is: ", file.current);
+      if (file.current && fileChanged.current) {
         imagePath = imageUrl
-          ? await replaceCurrentImage(imageUrl, file)
-          : await uploadNewImage(file);
+          ? await replaceCurrentImage(imageUrl, file.current)
+          : await uploadNewImage(file.current);
       } else {
         imagePath = imageUrl;
       }
@@ -169,21 +190,30 @@ function EditPost() {
       // attempt to update post
       const { error: updatePostError } = await supabase.from("posts").upsert({
         id,
-        entry: entry,
+        entry: tipTapEditor?.getJSON() ?? {},
         author: user?.id,
-        title: postTitle,
-        first_paragraph: firstParagraph,
+        title: postTitleRef.current,
+        first_paragraph: tipTapEditor?.getText() ?? "",
         image: imagePath,
+        published: publishedRef.current,
       });
+
       if (updatePostError) {
         throw updatePostError;
       }
+
       router.refresh();
-      setUpdated(true);
+      if (published) {
+        setUpdated(true);
+        setSaveStatus(null);
+      } else {
+        setSaveStatus("Saved");
+      }
     } catch (error: any) {
       setPostUpdateError(error);
       console.log("There was an error updating post.\n", "Error: ", error);
       setUpdating(false);
+      setSaveStatus(null);
     }
   }
 
@@ -235,12 +265,39 @@ function EditPost() {
     }
   }
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setUpdating(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    updateBlogPost();
+  }
+
   function eraseBlog() {
     tipTapEditor?.commands.clearContent();
+    debounce();
   }
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
+    postTitleRef.current = e.target.value;
+    debounce();
+  }
+
+  function unPublish() {
+    setPublished(false);
+    publishedRef.current = false;
+    setUpdated(false);
+    setSaveStatus(null);
+    updateBlogPost();
+  }
+
+  function publish() {
+    setPublished(true);
+    publishedRef.current = true;
+    setUpdated(false);
+    setSaveStatus(null);
+    updateBlogPost();
   }
 
   return (
@@ -248,7 +305,7 @@ function EditPost() {
       <div>
         <Nav />
       </div>
-      <form className={styles.main} onSubmit={updateBlogPost}>
+      <form className={styles.main} onSubmit={handleSubmit}>
         <div className={styles.topContainer}>
           <div>
             <Input labelFor="title" labelText="Title">
@@ -304,7 +361,14 @@ function EditPost() {
 
         <div className={styles.buttons}>
           <button type="submit" disabled={updating}>
-            Publish
+            Update
+          </button>
+          <button
+            type="button"
+            disabled={updating}
+            onClick={published ? unPublish : publish}
+          >
+            {published ? "Unpublish" : "Publish"}
           </button>
           <button
             className={styles.clearButton}
@@ -319,6 +383,14 @@ function EditPost() {
         )}
         {updated && (
           <p style={{ color: "green" }}>Post updated successfully!</p>
+        )}
+        {!published && saveStatus && (
+          <p style={{ color: saveStatus === "Saving..." ? "orange" : "green" }}>
+            {saveStatus}
+          </p>
+        )}
+        {published && (
+          <p style={{ color: "grey" }}>Unpublish to enable auto-saving.</p>
         )}
       </form>
     </div>

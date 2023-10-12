@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useRef, useState } from "react";
 import {
   User,
   createClientComponentClient,
@@ -9,7 +10,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import { Image as tiptapImage } from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
-import { JSONContent, useEditor } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
 import TipTapEdit from "@/components/blog/tiptapEditor/tiptap-edit";
 import styles from "./create.module.scss";
 import Nav from "@/components/dashboard/nav";
@@ -17,16 +18,20 @@ import { Input } from "@/components/input";
 import { useRouter } from "next/navigation";
 
 function CreatePost() {
-  const [entry, setEntry] = useState<JSONContent | null>(null);
-  const [firstParagraph, setFirstParagraph] = useState<string | null>(null);
   const [postTitle, setPostTitle] = useState<string | null>(null);
+  const postTitleRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileSizeWarning, setFileSizeWarning] = useState<string | null>(null);
   const [postCreationError, setPostCreationError] = useState<Error | null>(
     null
   );
+  const [saveStatus, setSaveStatus] = useState<
+    "Saving..." | "Draft saved." | null
+  >(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [id, setId] = useState<string | null>(null);
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
   const supabase = createClientComponentClient();
   const router = useRouter();
@@ -34,6 +39,14 @@ function CreatePost() {
   useEffect(() => {
     getUser();
   }, [supabase]);
+
+  function debounce() {
+    console.log("Change Event");
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+    timer.current = setTimeout(postBlog, 5000);
+  }
 
   async function getUser() {
     try {
@@ -56,6 +69,7 @@ function CreatePost() {
       return;
     }
     const file = event.target.files[0];
+    console.log("File: ", file);
     // Check file size and set warning if it's too large
     if (file && file.size > 1572864) {
       setFileSizeWarning(
@@ -80,13 +94,7 @@ function CreatePost() {
     ],
     onUpdate() {
       if (tipTapEditor) {
-        setEntry(tipTapEditor.getJSON());
-        let text = tipTapEditor.getText();
-
-        if (text.length > 300) {
-          text = text.substring(0, 300) + "...";
-        }
-        setFirstParagraph(text);
+        debounce();
       }
     },
   });
@@ -94,11 +102,12 @@ function CreatePost() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
-    postBlog();
+    postBlog(true);
   }
 
   // image filepath, user id, editor and editor entry, first paragraph, post title
-  async function postBlog() {
+  async function postBlog(publish: boolean = false) {
+    setSaveStatus("Saving...");
     try {
       let imagePath: string | null = null;
       // check if user is null, throws error
@@ -106,7 +115,7 @@ function CreatePost() {
       // check for editor, throws error
       if (!tipTapEditor) throw new Error("Editor failed to load");
       // attempt to upload image and get url, throws error
-      if (file) {
+      if (file && publish) {
         const fileExt = file.name.split(".").pop();
         imagePath = `${user.id}-${Math.random()}.${fileExt}`;
 
@@ -118,34 +127,86 @@ function CreatePost() {
         }
         console.log(uploadError);
       }
-      // attempt to add post to DB, throws error
-      const { error: postInsertError } = await supabase.from("posts").insert({
-        entry,
-        author: user?.id,
-        title: postTitle,
-        first_paragraph: firstParagraph,
-        image: imagePath, // will get this after uploading image
-      });
-
-      if (postInsertError) {
-        throw postInsertError;
+      // attempt to insert or upsert post to DB, throws error
+      if (id) {
+        await updatePost(imagePath);
+      } else {
+        await initialPost(imagePath);
       }
-      router.refresh();
-      router.push("/blog");
+
+      setSaveStatus("Draft saved.");
+
+      if (publish) {
+        router.refresh();
+        router.push("/blog");
+      }
     } catch (error: any) {
       setPostCreationError(error);
       setSubmitting(false);
+      setSaveStatus(null);
+    }
+  }
+
+  async function initialPost(imagePath: string | null) {
+    const entry = tipTapEditor?.getJSON();
+    const firstParagraph = tipTapEditor?.getText() || "";
+    const { data, error: postInsertError } = await supabase
+      .from("posts")
+      .insert({
+        entry,
+        author: user?.id,
+        title: postTitleRef.current,
+        first_paragraph:
+          firstParagraph?.length > 300
+            ? firstParagraph?.substring(0, 300) + "..."
+            : firstParagraph,
+        image: imagePath, // will get this after uploading image
+        published: false,
+      })
+      .select();
+
+    if (postInsertError) {
+      console.log("Error inserting post: ", postInsertError);
+      throw postInsertError;
+    }
+
+    setId(data[0].id);
+    console.log("Initial post data: ", data);
+  }
+
+  async function updatePost(
+    imagePath: string | null,
+    publish: boolean = false
+  ) {
+    const entry = tipTapEditor?.getJSON() ?? {};
+    const firstParagraph = tipTapEditor?.getText() ?? "";
+    const { error: postInsertError } = await supabase.from("posts").upsert({
+      id,
+      entry,
+      author: user?.id,
+      title: postTitleRef.current,
+      first_paragraph:
+        firstParagraph.length > 300
+          ? firstParagraph.substring(0, 300) + "..."
+          : firstParagraph,
+      image: imagePath, // will get this after uploading image
+      published: publish,
+    });
+
+    if (postInsertError) {
+      throw postInsertError;
     }
   }
 
   function eraseBlog() {
     tipTapEditor?.commands.clearContent();
-    setEntry(null);
-    setFirstParagraph(null);
+    debounce();
   }
 
   function onTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setPostTitle(e.target.value);
+    postTitleRef.current = e.target.value;
+    debounce();
   }
 
   return (
@@ -180,11 +241,6 @@ function CreatePost() {
           </div>
         </div>
         <TipTapEdit editor={tipTapEditor} />
-        {(!firstParagraph || firstParagraph.length < 120) && (
-          <p style={{ color: "red" }}>
-            Post must contain at least 120 characters.
-          </p>
-        )}
         <div className={styles.buttons}>
           <button type="submit" disabled={submitting}>
             Publish
@@ -199,6 +255,11 @@ function CreatePost() {
         </div>
         {postCreationError && (
           <p style={{ color: "red" }}>{postCreationError.message}</p>
+        )}
+        {saveStatus && (
+          <p style={{ color: saveStatus === "Saving..." ? "orange" : "green" }}>
+            {saveStatus}
+          </p>
         )}
       </form>
     </div>
