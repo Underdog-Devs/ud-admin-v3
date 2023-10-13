@@ -133,9 +133,6 @@ function EditPost() {
   function handleFiles(event: React.ChangeEvent<HTMLInputElement>) {
     if (!event.target.files || event.target.files.length === 0) {
       setFileSizeWarning(null);
-      file.current = null;
-      fileChanged.current = true;
-      updateBlogPost();
       return;
     }
     const newFile = event.target.files[0];
@@ -149,7 +146,7 @@ function EditPost() {
       setFileSizeWarning(null);
       file.current = newFile;
       fileChanged.current = true;
-      updateBlogPost();
+      debounce();
     }
   }
 
@@ -307,6 +304,13 @@ function EditPost() {
     updateBlogPost();
   }
 
+  function removeImage() {
+    setImageUrl(null);
+    file.current = null;
+    fileChanged.current = true;
+    debounce();
+  }
+
   return (
     <div className={styles.container}>
       <div>
@@ -337,17 +341,39 @@ function EditPost() {
                   )}
               </div>
             )}
-            <Input labelFor="featured-image" labelText="Featured Image">
-              <input
-                onChange={handleFiles}
-                id="featured-image"
-                type="file"
-                accept="image/*"
-              />
-            </Input>
-            {fileSizeWarning && (
-              <p style={{ color: "red" }}>{fileSizeWarning}</p>
-            )}
+            <div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <Input labelFor="featured-image" labelText="Featured Image">
+                  <input
+                    onChange={handleFiles}
+                    id="featured-image"
+                    type="file"
+                    accept="image/*"
+                  />
+                </Input>
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  style={{
+                    backgroundColor: "#f6931d",
+                    border: "none",
+                    borderRadius: "5px",
+                    padding: "0 15px",
+                    color: "#58555a",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    height: "45px",
+                    alignSelf: "end",
+                    marginBottom: "0.7rem",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+              {fileSizeWarning && (
+                <p style={{ color: "red" }}>{fileSizeWarning}</p>
+              )}
+            </div>
           </div>
         </div>
 
