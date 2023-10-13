@@ -187,13 +187,18 @@ function EditPost() {
         imagePath = imageUrl;
       }
 
+      const entry = tipTapEditor?.getJSON() ?? {};
+      const firstParagraph = tipTapEditor?.getText() ?? "";
       // attempt to update post
       const { error: updatePostError } = await supabase.from("posts").upsert({
         id,
-        entry: tipTapEditor?.getJSON() ?? {},
+        entry: entry,
         author: user?.id,
         title: postTitleRef.current,
-        first_paragraph: tipTapEditor?.getText() ?? "",
+        first_paragraph:
+          firstParagraph.length > 300
+            ? firstParagraph.slice(0, 300) + "..."
+            : firstParagraph,
         image: imagePath,
         published: publishedRef.current,
       });
@@ -201,6 +206,8 @@ function EditPost() {
       if (updatePostError) {
         throw updatePostError;
       }
+
+      setUpdating(false);
 
       router.refresh();
       if (published) {
@@ -371,6 +378,7 @@ function EditPost() {
             {published ? "Unpublish" : "Publish"}
           </button>
           <button
+            type="button"
             className={styles.clearButton}
             onClick={eraseBlog}
             disabled={updating}
