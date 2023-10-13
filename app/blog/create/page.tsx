@@ -102,6 +102,9 @@ function CreatePost() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
     postBlog(true);
   }
 
