@@ -28,7 +28,11 @@ export function PostImage({ url, size }: { url: string | null; size: number }) {
       }
     }
 
-    if (url) downloadImage(url);
+    if (url) {
+      downloadImage(url);
+    } else {
+      setImageUrl(null);
+    }
   }, [url, supabase]);
 
   // async function uploadImage(event: React.ChangeEvent<HTMLInputElement>) {
