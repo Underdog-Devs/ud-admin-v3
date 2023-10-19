@@ -173,15 +173,21 @@ function EditPost() {
       if (!user?.id) throw new Error("Unable to find user id or id is invalid");
       // check for editor, throws error
       if (!tipTapEditor) throw new Error("Editor failed to load");
-      // if file exists, user used the picker to set it
+
+      // if file exists and the file has changed
       // attempt to upload image and get url, throws error
-      console.log("file is: ", file.current);
       if (file.current && fileChanged.current) {
         imagePath = imageUrl
           ? await replaceCurrentImage(imageUrl, file.current)
           : await uploadNewImage(file.current);
       } else {
         imagePath = imageUrl;
+      }
+
+      // if file does not exist and file has changed
+      // then user is trying to remove the image
+      if (!file.current && fileChanged.current) {
+        imagePath = null;
       }
 
       const entry = tipTapEditor?.getJSON() ?? {};
