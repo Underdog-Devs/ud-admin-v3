@@ -9,6 +9,8 @@
   justify-items: center;
   max-width: 1200px;
   margin: $space-lg auto 0 auto;
+
+	margin-bottom: $space-lg;
   @include for-tablet-up {
     > :nth-child(1) {
       display: none;
