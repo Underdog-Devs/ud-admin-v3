@@ -1,0 +1,29 @@
+@import "../../app/styles/globals.scss";
+
+.container {
+  background-color: $udDarkGrey;
+  display: flex;
+  padding-right: $space-md;
+  width: 100%;
+  max-height: 100px;
+  justify-content: space-between;
+  align-items: center;
+  color: $udOrange;
+  font-family: $linkFont;
+  font-size: min(max(14px, 1.5vw), 16px);
+  margin-bottom: 40px;
+}
+
+.image {
+  cursor: pointer;
+  margin-left: $space-xl;
+}
+
+.link {
+  cursor: pointer;
+  color: $udOrange;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: $space-md;
+}
