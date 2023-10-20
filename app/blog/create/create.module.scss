@@ -8,7 +8,7 @@
 	gap: 20px;
 	justify-items: center;
 	max-width: 1200px;
-	margin: $space-lg auto 0 auto;
+	margin: $space-lg auto $space-lg auto;
 	@include for-tablet-up {
 		> :nth-child(1) {
 			display: none;

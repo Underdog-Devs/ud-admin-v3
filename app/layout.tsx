@@ -3,6 +3,13 @@ import NavBar from "../components/navbar";
 import { RootContextProvider } from "./context/RootContext";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import type { Metadata } from 'next'
+
+
+export const metadata: Metadata = {
+  title: 'UnderdogDevs.org Admin Dashboard',
+  description: 'Admin Dashboard for UnderdogDevs.org',
+}
 
 export default async function RootLayout({
   children,

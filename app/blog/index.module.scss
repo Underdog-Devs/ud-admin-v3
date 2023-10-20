@@ -7,24 +7,24 @@
 	margin-top: $space-lg;
 	justify-items: center;
 	max-width: 1200px;
-	margin: $space-lg auto 0 auto;
+	margin: $space-lg auto $space-lg auto;
+	padding-right: $space-md;
+	
 	@include for-phone-only {
 		grid-template-columns: 1fr;
+		margin: $space-lg auto 0 40px;
 		> :nth-child(1) {
 			display: none;
-			
 		}
 	}
 	> :first-child{
 		max-width: 700px;
 		justify-self: center;
 	}
-
 	@include for-phone-only {
 		grid-template-columns: 1fr;
 		> :nth-child(1) {
 			display: none;
-			
 		}
 	}
 	.main {
@@ -32,8 +32,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		padding: 0 $space-md;
-		width: 90%;
+		padding: 0 $space-md 0 0;
 		margin-bottom: $space-xl;
 		> * {
 			display: flex;
