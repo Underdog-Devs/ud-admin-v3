@@ -42,10 +42,6 @@ const PostPage = () => {
     getPosts();
   }, [supabase, editor]);
 
-  // useEffect(() => {
-  //   if (post?.image) getImage(post.image);
-  // }, [supabase, post]);
-
   async function getPosts() {
     try {
       const { data, error } = await supabase
@@ -57,14 +53,13 @@ const PostPage = () => {
       if (error) {
         throw error;
       }
-
-      console.log(data.entry);
       if (data && editor) {
         setPosts(data);
         getImage(data.image);
         editor.commands.setContent(data.entry);
       }
     } catch (error) {
+      // TODO: add error handling
       // if in dev mode, log error
       if (process.env.NODE_ENV === "development") {
         console.log("Error fetching post in /blog/[title]\n", "Error: ", error);
@@ -85,6 +80,7 @@ const PostPage = () => {
       const url = URL.createObjectURL(data);
       setImageUrl(url);
     } catch (error) {
+      // TODO: add error handling
       console.log("Problem fetching image in /blog/[title]");
     }
   }

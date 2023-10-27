@@ -21,6 +21,7 @@ export function PostImage({ url, size }: { url: string | null; size: number }) {
         const url = URL.createObjectURL(data);
         setImageUrl(url);
       } catch (error) {
+        // TODO: add error handling
         // if in dev mode, log error
         if (process.env.NODE_ENV === "development") {
           console.log("Error downloading image: ", error);

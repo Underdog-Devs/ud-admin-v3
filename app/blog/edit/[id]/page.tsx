@@ -106,6 +106,7 @@ function EditPost() {
       publishedRef.current = data.published;
       setDidFetch(true);
     } catch (error) {
+      // TODO: add error handling
       if (process.env.NODE_ENV === "development") {
         console.log(
           "Error fetching post in /blog/edit/[id]\n",
@@ -126,6 +127,7 @@ function EditPost() {
 
       setUser(data.user);
     } catch (error) {
+      // TODO: add error handling
       console.log("There was an error fetching User.\n", "Error: ", error);
     }
   }
@@ -220,8 +222,11 @@ function EditPost() {
         setSaveStatus("Saved");
       }
     } catch (error: any) {
+      // TODO: add error handling
       setPostUpdateError(error);
-      console.log("There was an error updating post.\n", "Error: ", error);
+      if (process.env.NODE_ENV === "development") {
+        console.log("There was an error updating post.\n", "Error: ", error);
+      }
       setUpdating(false);
       setSaveStatus(null);
     }
@@ -244,6 +249,7 @@ function EditPost() {
         return data.path;
       }
     } catch (error) {
+      // TODO: add error handling
       console.log("Error placing image in storage: ", error);
       return null;
     }
@@ -270,6 +276,7 @@ function EditPost() {
       // Return new image path to be saved in post table
       return newImagePath;
     } catch (error) {
+      // TODO: add error handling
       console.log("Error replacing image in storage: ", error);
       return null;
     }
