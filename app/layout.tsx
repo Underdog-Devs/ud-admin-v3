@@ -3,23 +3,32 @@ import NavBar from "../components/navbar";
 import { RootContextProvider } from "./context/RootContext";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { LoggedOutNav } from "@/components/navbar/LoggedOutNav";
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'UnderdogDevs.org Admin Dashboard',
+  description: 'Admin Dashboard for UnderdogDevs.org',
+}
+
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createServerComponentClient({ cookies });
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body>
         <main className="min-h-screen bg-background flex flex-col items-center">
           <RootContextProvider>
-            <NavBar user={user?user:null}/>
+            {user ? <NavBar user={user} /> : <LoggedOutNav />}
             {children}
           </RootContextProvider>
         </main>

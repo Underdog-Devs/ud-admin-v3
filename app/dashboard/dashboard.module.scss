@@ -7,9 +7,11 @@
 	margin-top: $space-lg;
 	justify-items: center;
 	max-width: 1200px;
-	margin: $space-lg auto 0 auto;
+	margin: $space-lg auto $space-lg auto;
+	padding-right: $space-md;
 	@include for-phone-only {
 		grid-template-columns: 1fr;
+		padding: 0 40px;
 		> :nth-child(1) {
 			display: none;
 			

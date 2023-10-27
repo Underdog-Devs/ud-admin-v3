@@ -23,7 +23,7 @@
     position: relative;
     width: 60%;
     margin-bottom: $space-lg;
-    
+
     .backButton {
       padding-top: 30px;
       top: 40px;
@@ -82,6 +82,21 @@
         margin: $space-md 0;
         list-style-type: none;
       }
+    }
+  }
+
+  .blogImageContainer {
+    position: relative;
+    margin: $space-md 0;
+    @include for-phone-only {
+      width: 100%;
+      height: calc(75vw);
+      max-height: 600px;
+    }
+    @include for-tablet-up {
+      width: 100%;
+      height: calc(50vw);
+      max-height: 600px;
     }
   }
 
