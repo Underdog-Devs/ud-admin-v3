@@ -41,7 +41,6 @@ function CreatePost() {
   }, [supabase]);
 
   function debounce() {
-    console.log("Change Event");
     if (timer.current) {
       clearTimeout(timer.current);
     }
@@ -58,6 +57,7 @@ function CreatePost() {
 
       setUser(data.user);
     } catch (error) {
+      // TODO: add error handling
       console.log("There was an error fetching User.\n", "Error: ", error);
     }
   }
@@ -69,7 +69,6 @@ function CreatePost() {
       return;
     }
     const file = event.target.files[0];
-    console.log("File: ", file);
     // Check file size and set warning if it's too large
     if (file && file.size > 1572864) {
       setFileSizeWarning(
@@ -128,7 +127,6 @@ function CreatePost() {
         if (uploadError) {
           throw uploadError;
         }
-        console.log(uploadError);
       }
       // attempt to insert or upsert post to DB, throws error
       if (id) {
@@ -172,9 +170,7 @@ function CreatePost() {
       console.log("Error inserting post: ", postInsertError);
       throw postInsertError;
     }
-
     setId(data[0].id);
-    console.log("Initial post data: ", data);
   }
 
   async function updatePost(

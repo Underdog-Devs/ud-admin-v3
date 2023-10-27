@@ -28,6 +28,7 @@ function Post({ post }: { post: any }) {
       const url = URL.createObjectURL(data);
       setImageUrl(url);
     } catch (error) {
+      // TODO: add error handling
       console.log("Error fetching image in post.tsx!");
     }
   }
