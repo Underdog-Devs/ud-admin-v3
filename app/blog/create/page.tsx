@@ -132,9 +132,9 @@ function CreatePost() {
       }
       // attempt to insert or upsert post to DB, throws error
       if (id) {
-        await updatePost(imagePath);
+        await updatePost(imagePath, publish);
       } else {
-        await initialPost(imagePath);
+        await initialPost(imagePath, publish);
       }
 
       setSaveStatus("Draft saved.");
@@ -150,7 +150,10 @@ function CreatePost() {
     }
   }
 
-  async function initialPost(imagePath: string | null) {
+  async function initialPost(
+    imagePath: string | null,
+    publish: boolean = false
+  ) {
     const entry = tipTapEditor?.getJSON();
     const firstParagraph = tipTapEditor?.getText() || "";
     const { data, error: postInsertError } = await supabase
@@ -164,7 +167,7 @@ function CreatePost() {
             ? firstParagraph?.substring(0, 300) + "..."
             : firstParagraph,
         image: imagePath, // will get this after uploading image
-        published: false,
+        published: publish,
       })
       .select();
 
